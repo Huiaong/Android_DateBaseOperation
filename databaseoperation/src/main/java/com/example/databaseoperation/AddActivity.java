@@ -12,9 +12,8 @@ import android.widget.Toast;
 public class AddActivity extends AppCompatActivity {
     private EditText edtUserName, edtPassWord;
     private Button btnRegist;
-    private SQLiteDatabase database;
-    private ContentValues contentValues;
-    private MyHelper myHelper;
+    private Dao dao;
+    private Long flag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +23,7 @@ public class AddActivity extends AppCompatActivity {
     }
 
     private void init() {
-        contentValues = new ContentValues();
-
-        myHelper = new MyHelper(this, "Data", null, 1);
-        database = myHelper.getWritableDatabase();
+        dao = new Dao(this);
 
         edtUserName = findViewById(R.id.edt_UserName);
         edtPassWord = findViewById(R.id.edt_PassWord);
@@ -39,12 +35,13 @@ public class AddActivity extends AppCompatActivity {
     private class btnLinistener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            contentValues.put("UserName", edtUserName.getText().toString());
-            contentValues.put("PassWord", edtPassWord.getText().toString());
-            database.insert("user", null, contentValues);
+            flag = dao.insert(edtUserName.getText().toString(), edtPassWord.getText().toString());
             edtUserName.setText("");
             edtPassWord.setText("");
-            Toast.makeText(AddActivity.this, "插入数据成功", Toast.LENGTH_SHORT).show();
+            if (flag != -1)
+                Toast.makeText(AddActivity.this, "插入数据成功", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(AddActivity.this, "插入数据失败", Toast.LENGTH_SHORT).show();
         }
     }
 }

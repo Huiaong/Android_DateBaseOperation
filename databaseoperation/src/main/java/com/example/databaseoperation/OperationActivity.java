@@ -24,14 +24,15 @@ public class OperationActivity extends AppCompatActivity implements AdapterView.
 
     private TextView textView;
     private ListView listView;
-    private MyHelper myHelper;
-    private SQLiteDatabase database;
+    private Cursor cursor;
+
+    private Dao dao;
+    private String UserName;
     private Intent it;
     private int BtnId;
     private SimpleAdapter adapter;
     private List list;
     private Map map;
-    private Cursor cursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +44,8 @@ public class OperationActivity extends AppCompatActivity implements AdapterView.
     }
 
     private void init() {
-        myHelper = new MyHelper(this, "Data", null, 1);
-        database = myHelper.getWritableDatabase();
-        cursor = database.query("user", null, null, null, null, null, null);
-
+        dao = new Dao(this);
+        cursor = dao.select();
         it = getIntent();
         BtnId = it.getIntExtra("BtnId", -1);
         textView = findViewById(R.id.Tv_Tip);
@@ -105,13 +104,8 @@ public class OperationActivity extends AppCompatActivity implements AdapterView.
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                database.delete(
-                        "user",
-                        "UserName = ?",
-                        new String[]{
-                                cursor.moveToPosition(position) ? cursor.getString(cursor.getColumnIndex("UserName")) : null
-                        }
-                );
+                UserName = cursor.moveToPosition(position) ? cursor.getString(cursor.getColumnIndex("UserName")) : null;
+                dao.delete(UserName);
                 list.remove(position);
                 adapter.notifyDataSetChanged();
             }
@@ -125,8 +119,8 @@ public class OperationActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        it = new Intent(OperationActivity.this,UpdateActivity.class);
-        it.putExtra("ItemPosition",position);
+        it = new Intent(OperationActivity.this, UpdateActivity.class);
+        it.putExtra("ItemPosition", position);
         startActivity(it);
     }
 }
